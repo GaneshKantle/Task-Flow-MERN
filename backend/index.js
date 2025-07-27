@@ -50,18 +50,37 @@ const User = mongoose.model('register-users', userSchema);
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://your-frontend-url.vercel.app',
+    'https://taskflow-mern.vercel.app',
+    'https://taskflow-mern-git-main.vercel.app',
+    'https://taskflow-mern-git-main-your-username.vercel.app'
+  ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 // Register endpoint
 app.post('/api/register', async (req, res) => {
   try {
+    console.log('Registration request received:', { body: req.body });
+    
     const { name, email, password } = req.body;
+    
+    // Validate required fields
+    if (!name || !email || !password) {
+      console.log('Missing required fields:', { name: !!name, email: !!email, password: !!password });
+      return res.status(400).json({ 
+        message: 'Missing required fields: name, email, and password are required' 
+      });
+    }
     
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('User already exists:', email);
       return res.status(400).json({ message: 'User with this email already exists' });
     }
     
@@ -77,6 +96,7 @@ app.post('/api/register', async (req, res) => {
     });
     
     await newUser.save();
+    console.log('User created successfully:', { id: newUser._id, email: newUser.email });
     
     // Create token and set cookie
     const token = jwt.sign({ 
@@ -103,7 +123,10 @@ app.post('/api/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error during registration' });
+    res.status(500).json({ 
+      message: 'Server error during registration',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 });
 
@@ -185,6 +208,15 @@ app.post('/api/logout', (req, res) => {
     maxAge: 0,
   }));
   res.json({ message: 'Logged out' });
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'Backend is working!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Health check endpoint
