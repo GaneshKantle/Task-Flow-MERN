@@ -50,17 +50,23 @@ const User = mongoose.model('register-users', userSchema);
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://your-frontend-url.vercel.app',
-    'https://taskflow-mern.vercel.app',
-    'https://taskflow-mern-git-main.vercel.app',
-    'https://taskflow-mern-git-main-your-username.vercel.app'
-  ],
+  origin: true, // Allow all origins temporarily
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
+
+// Error handling middleware for JSON parsing
+app.use((error, req, res, next) => {
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    console.error('JSON parsing error:', error.message);
+    return res.status(400).json({ 
+      message: 'Invalid JSON format',
+      error: 'The request body contains malformed JSON'
+    });
+  }
+  next();
+});
 
 // Register endpoint
 app.post('/api/register', async (req, res) => {
