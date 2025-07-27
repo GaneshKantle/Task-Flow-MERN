@@ -293,6 +293,127 @@ function LogoutPage() {
   );
 }
 
+// Tasks Tab Component with Filtering
+function TasksTab() {
+  const [tasks] = useState([
+    { id: 1, title: 'Design user interface', status: 'In Progress', priority: 'High', due: 'Today' },
+    { id: 2, title: 'Review code changes', status: 'Pending', priority: 'Medium', due: 'Tomorrow' },
+    { id: 3, title: 'Update documentation', status: 'Completed', priority: 'Low', due: 'Next week' },
+    { id: 4, title: 'Fix bug in login system', status: 'Completed', priority: 'High', due: 'Yesterday' },
+    { id: 5, title: 'Create API endpoints', status: 'In Progress', priority: 'Medium', due: 'This week' },
+    { id: 6, title: 'Write unit tests', status: 'Pending', priority: 'Low', due: 'Next month' }
+  ]);
+
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter tasks based on status and search term
+  const filteredTasks = tasks.filter(task => {
+    const matchesStatus = filterStatus === 'All' || task.status === filterStatus;
+    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  const statusOptions = ['All', 'Pending', 'In Progress', 'Completed'];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold">My Tasks</h3>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          + Add Task
+        </button>
+      </div>
+
+      {/* Filter and Search Controls */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Status Filter */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {statusOptions.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Search */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Search Tasks</label>
+            <input
+              type="text"
+              placeholder="Search by task title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Results Summary */}
+        <div className="mt-4 text-sm text-gray-600">
+          Showing {filteredTasks.length} of {tasks.length} tasks
+          {filterStatus !== 'All' && ` (${filterStatus})`}
+          {searchTerm && ` matching "${searchTerm}"`}
+        </div>
+      </div>
+      
+      {/* Tasks List */}
+      <div className="grid gap-4">
+        {filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
+            <div key={task.id} className="bg-white p-4 rounded-lg shadow-sm border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">{task.title}</h4>
+                  <div className="flex items-center space-x-4 mt-2">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      task.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                      task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {task.status}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      task.priority === 'High' ? 'bg-red-100 text-red-800' :
+                      task.priority === 'Medium' ? 'bg-orange-100 text-orange-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {task.priority}
+                    </span>
+                    <span className="text-sm text-gray-500">Due: {task.due}</span>
+                  </div>
+                </div>
+                <button className="text-gray-400 hover:text-gray-600">
+                  ⋮
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-white p-8 rounded-lg shadow-sm border text-center">
+            <div className="text-gray-400 text-6xl mb-4">📝</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+            <p className="text-gray-600">
+              {searchTerm 
+                ? `No tasks match "${searchTerm}"`
+                : filterStatus !== 'All' 
+                  ? `No ${filterStatus.toLowerCase()} tasks`
+                  : 'No tasks available'
+              }
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Advanced Dashboard Component
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -314,7 +435,6 @@ function Dashboard() {
     { id: 'overview', name: 'Overview', icon: '📊' },
     { id: 'tasks', name: 'Tasks', icon: '✅' },
     { id: 'projects', name: 'Projects', icon: '📁' },
-    { id: 'analytics', name: 'Analytics', icon: '📈' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
 
@@ -376,52 +496,7 @@ function Dashboard() {
         );
       
       case 'tasks':
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold">My Tasks</h3>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                + Add Task
-              </button>
-            </div>
-            
-            <div className="grid gap-4">
-              {[
-                { title: 'Design user interface', status: 'In Progress', priority: 'High', due: 'Today' },
-                { title: 'Review code changes', status: 'Pending', priority: 'Medium', due: 'Tomorrow' },
-                { title: 'Update documentation', status: 'Completed', priority: 'Low', due: 'Next week' }
-              ].map((task, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow-sm border">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">{task.title}</h4>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          task.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                          task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {task.status}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          task.priority === 'High' ? 'bg-red-100 text-red-800' :
-                          task.priority === 'Medium' ? 'bg-orange-100 text-orange-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {task.priority}
-                        </span>
-                        <span className="text-sm text-gray-500">Due: {task.due}</span>
-                      </div>
-                    </div>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      ⋮
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <TasksTab />;
       
       case 'projects':
         return (
@@ -637,7 +712,7 @@ function App() {
         <Route path="/register" element={isLoggedIn ? <Navigate to="/dashboard" /> : <RegisterPage />} />
         <Route path="/logout" element={<LogoutPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/register" />} />
       </Routes>
     </Router>
   );
