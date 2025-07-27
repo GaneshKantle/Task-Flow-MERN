@@ -414,6 +414,223 @@ function TasksTab() {
   );
 }
 
+// Admin Tab Component with User Logs
+function AdminTab() {
+  const [userLogs, setUserLogs] = useState([
+    {
+      id: 1,
+      userName: 'John Doe',
+      userEmail: 'john@example.com',
+      role: 'User',
+      loginTime: '2024-01-15 09:30:00',
+      logoutTime: '2024-01-15 17:45:00',
+      jwtToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      ipAddress: '192.168.1.100',
+      status: 'Active'
+    },
+    {
+      id: 2,
+      userName: 'Jane Smith',
+      userEmail: 'jane@example.com',
+      role: 'Admin',
+      loginTime: '2024-01-15 08:15:00',
+      logoutTime: null,
+      jwtToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      ipAddress: '192.168.1.101',
+      status: 'Online'
+    },
+    {
+      id: 3,
+      userName: 'Mike Johnson',
+      userEmail: 'mike@example.com',
+      role: 'User',
+      loginTime: '2024-01-14 14:20:00',
+      logoutTime: '2024-01-14 18:30:00',
+      jwtToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      ipAddress: '192.168.1.102',
+      status: 'Inactive'
+    },
+    {
+      id: 4,
+      userName: 'Sarah Wilson',
+      userEmail: 'sarah@example.com',
+      role: 'User',
+      loginTime: '2024-01-15 10:00:00',
+      logoutTime: null,
+      jwtToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      ipAddress: '192.168.1.103',
+      status: 'Online'
+    }
+  ]);
+
+  const [selectedLogs, setSelectedLogs] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedLogs(userLogs.map(log => log.id));
+    } else {
+      setSelectedLogs([]);
+    }
+  };
+
+  const handleSelectLog = (logId, checked) => {
+    if (checked) {
+      setSelectedLogs([...selectedLogs, logId]);
+    } else {
+      setSelectedLogs(selectedLogs.filter(id => id !== logId));
+    }
+  };
+
+  const handleDeleteLogs = () => {
+    setUserLogs(userLogs.filter(log => !selectedLogs.includes(log.id)));
+    setSelectedLogs([]);
+    setShowDeleteConfirm(false);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Online': return 'bg-green-100 text-green-800';
+      case 'Active': return 'bg-blue-100 text-blue-800';
+      case 'Inactive': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getRoleColor = (role) => {
+    return role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold">Admin Panel - User Logs</h3>
+        <div className="flex space-x-2">
+          {selectedLogs.length > 0 && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Delete Selected ({selectedLogs.length})
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* User Logs Table */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedLogs.length === userLogs.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Login Time
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Logout Time
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  IP Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  JWT Token
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {userLogs.map((log) => (
+                <tr key={log.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={selectedLogs.includes(log.id)}
+                      onChange={(e) => handleSelectLog(log.id, e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{log.userName}</div>
+                      <div className="text-sm text-gray-500">{log.userEmail}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(log.role)}`}>
+                      {log.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {log.loginTime}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {log.logoutTime || 'Still Online'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {log.ipAddress}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(log.status)}`}>
+                      {log.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900 font-mono">
+                      {log.jwtToken.substring(0, 20)}...
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete {selectedLogs.length} selected user log(s)? This action cannot be undone.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteLogs}
+                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Advanced Dashboard Component
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -435,6 +652,7 @@ function Dashboard() {
     { id: 'overview', name: 'Overview', icon: '📊' },
     { id: 'tasks', name: 'Tasks', icon: '✅' },
     { id: 'projects', name: 'Projects', icon: '📁' },
+    { id: 'admin', name: 'Admin', icon: '👑' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
 
@@ -492,6 +710,9 @@ function Dashboard() {
                 ))}
               </div>
             </div>
+            {/* <a href='#tasks'>
+            <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Click for all Tasks</button>
+            </a> */}
           </div>
         );
       
@@ -567,6 +788,9 @@ function Dashboard() {
             </div>
           </div>
         );
+      
+      case 'admin':
+        return <AdminTab />;
       
       case 'settings':
         return (
