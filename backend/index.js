@@ -65,7 +65,10 @@ app.use(cors({
 // Register endpoint
 app.post('/api/register', async (req, res) => {
   try {
-    console.log('Registration request received:', { body: req.body });
+    console.log('Registration request received');
+    console.log('Headers:', req.headers);
+    console.log('Raw body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
     
     const { name, email, password } = req.body;
     
@@ -216,6 +219,16 @@ app.get('/api/test', (req, res) => {
     message: 'Backend is working!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Test POST endpoint
+app.post('/api/test-post', (req, res) => {
+  console.log('Test POST received:', req.body);
+  res.json({ 
+    message: 'POST request working!',
+    received: req.body,
+    timestamp: new Date().toISOString()
   });
 });
 
